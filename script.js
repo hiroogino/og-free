@@ -93,7 +93,7 @@ function animateCounter(element) {
     }, 16);
 }
 
-// パーティクル効果（ヒーローセクション）
+// パーティクル効果（ヒーローセクション）- 強化版
 function createParticles() {
     const hero = document.querySelector('.hero');
     const particlesContainer = document.createElement('div');
@@ -110,52 +110,248 @@ function createParticles() {
     
     hero.appendChild(particlesContainer);
     
-    // パーティクルを作成
-    for (let i = 0; i < 50; i++) {
-        createParticle(particlesContainer);
+    // より多くのパーティクルと多様な種類
+    for (let i = 0; i < 80; i++) {
+        createParticle(particlesContainer, 'normal');
+    }
+    
+    // 特別なパーティクル（より大きく、光る）
+    for (let i = 0; i < 15; i++) {
+        createParticle(particlesContainer, 'glow');
+    }
+    
+    // 接続線のパーティクル
+    for (let i = 0; i < 5; i++) {
+        createConnectionLine(particlesContainer);
     }
 }
 
-function createParticle(container) {
+function createParticle(container, type = 'normal') {
     const particle = document.createElement('div');
-    particle.style.cssText = `
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        background: rgba(37, 99, 235, 0.3);
-        border-radius: 50%;
-        pointer-events: none;
-    `;
+    
+    if (type === 'glow') {
+        particle.style.cssText = `
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.8) 0%, rgba(37, 99, 235, 0.2) 70%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
+        `;
+    } else {
+        particle.style.cssText = `
+            position: absolute;
+            width: ${Math.random() * 4 + 2}px;
+            height: ${Math.random() * 4 + 2}px;
+            background: rgba(${Math.random() * 100 + 155}, ${Math.random() * 100 + 155}, 255, ${Math.random() * 0.5 + 0.2});
+            border-radius: 50%;
+            pointer-events: none;
+        `;
+    }
     
     // ランダムな位置と動きを設定
     const x = Math.random() * 100;
     const y = Math.random() * 100;
-    const duration = Math.random() * 20 + 10;
-    const delay = Math.random() * 5;
+    const duration = Math.random() * 30 + 15;
+    const delay = Math.random() * 10;
     
     particle.style.left = x + '%';
     particle.style.top = y + '%';
-    particle.style.animation = `float ${duration}s ${delay}s infinite linear`;
+    particle.style.animation = `floatEnhanced ${duration}s ${delay}s infinite linear`;
     
     container.appendChild(particle);
 }
 
-// フローティングアニメーション用CSS
+function createConnectionLine(container) {
+    const line = document.createElement('div');
+    line.style.cssText = `
+        position: absolute;
+        width: 1px;
+        height: 100px;
+        background: linear-gradient(180deg, 
+            transparent 0%, 
+            rgba(37, 99, 235, 0.3) 50%, 
+            transparent 100%);
+        pointer-events: none;
+        transform-origin: top;
+    `;
+    
+    const x = Math.random() * 100;
+    const rotation = Math.random() * 360;
+    const duration = Math.random() * 20 + 10;
+    
+    line.style.left = x + '%';
+    line.style.top = '0%';
+    line.style.transform = `rotate(${rotation}deg)`;
+    line.style.animation = `lineFloat ${duration}s infinite ease-in-out`;
+    
+    container.appendChild(line);
+}
+
+// タイピングエフェクト強化
+function enhancedTypingEffect() {
+    const textElements = document.querySelectorAll('.hero-text-anime');
+    
+    textElements.forEach((element, index) => {
+        const text = element.textContent;
+        element.textContent = '';
+        element.style.overflow = 'hidden';
+        element.style.borderRight = '3px solid #2563eb';
+        element.style.whiteSpace = 'nowrap';
+        
+        let charIndex = 0;
+        const typingSpeed = 100;
+        const startDelay = index * 600;
+        
+        setTimeout(() => {
+            const typeTimer = setInterval(() => {
+                if (charIndex < text.length) {
+                    element.textContent += text.charAt(charIndex);
+                    charIndex++;
+                } else {
+                    clearInterval(typeTimer);
+                    // カーソル点滅効果
+                    setTimeout(() => {
+                        element.style.borderRight = 'none';
+                    }, 1000);
+                }
+            }, typingSpeed);
+        }, startDelay);
+    });
+}
+
+// マウス追従エフェクト
+function createMouseFollowEffect() {
+    const hero = document.querySelector('.hero');
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    // マウス追従要素作成
+    for (let i = 0; i < 3; i++) {
+        const follower = document.createElement('div');
+        follower.className = `mouse-follower follower-${i + 1}`;
+        follower.style.cssText = `
+            position: absolute;
+            width: ${20 + i * 10}px;
+            height: ${20 + i * 10}px;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(37, 99, 235, ${0.3 - i * 0.1}) 0%, 
+                transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            transition: transform 0.${3 + i}s ease-out;
+        `;
+        hero.appendChild(follower);
+    }
+    
+    hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+        
+        const followers = hero.querySelectorAll('.mouse-follower');
+        followers.forEach((follower, index) => {
+            const delay = (index + 1) * 0.1;
+            setTimeout(() => {
+                follower.style.transform = `translate(${mouseX - 15 - index * 5}px, ${mouseY - 15 - index * 5}px)`;
+            }, delay * 100);
+        });
+    });
+}
+
+// インタラクションリップルエフェクト
+function addRippleEffect() {
+    const buttons = document.querySelectorAll('.btn-impact');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: rippleEffect 0.6s ease-out;
+                pointer-events: none;
+            `;
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+}
+
+// スクロール連動視差エフェクト
+function createScrollParallax() {
+    const hero = document.querySelector('.hero');
+    const heroCard = document.querySelector('.hero-card');
+    
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        const rate = scrolled * -0.3;
+        const cardRate = scrolled * 0.1;
+        
+        if (hero) {
+            hero.style.transform = `translateY(${rate}px)`;
+        }
+        
+        if (heroCard) {
+            heroCard.style.transform = `perspective(1000px) rotateY(-10deg) rotateX(5deg) translateY(${cardRate}px)`;
+        }
+    });
+}
+
+// フローティングアニメーション用CSS - 強化版
 const style = document.createElement('style');
 style.textContent = `
-    @keyframes float {
+    @keyframes floatEnhanced {
         0% {
-            transform: translateY(100vh) scale(0);
+            transform: translateY(100vh) scale(0) rotate(0deg);
             opacity: 0;
         }
         10% {
             opacity: 1;
         }
+        50% {
+            transform: translateY(50vh) scale(1) rotate(180deg);
+        }
         90% {
             opacity: 1;
         }
         100% {
-            transform: translateY(-100vh) scale(1);
+            transform: translateY(-10vh) scale(0) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes lineFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg) scale(1);
+            opacity: 0.3;
+        }
+        50% {
+            transform: translateY(-20px) rotate(5deg) scale(1.1);
+            opacity: 0.7;
+        }
+    }
+    
+    @keyframes rippleEffect {
+        to {
+            transform: scale(2);
             opacity: 0;
         }
     }
@@ -178,15 +374,19 @@ style.textContent = `
         top: 70px;
         left: 0;
         width: 100%;
-        background: white;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(10px);
         flex-direction: column;
         padding: 2rem;
-        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
         z-index: 999;
     }
     
     .nav-menu.active li {
         margin: 0.5rem 0;
+    }
+    
+    .nav-menu.active a {
+        color: white;
     }
     
     .typing-effect {
@@ -531,7 +731,7 @@ function initializeEmailJS() {
     }
 }
 
-// 画面読み込み完了時の初期化
+// 画面読み込み完了時の初期化 - 強化版
 document.addEventListener('DOMContentLoaded', function() {
     // EmailJS初期化
     initializeEmailJS();
@@ -544,13 +744,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // パーティクル効果を追加
     createParticles();
     
-    // タイピング効果をヒーロータイトルに追加
-    const heroMain = document.querySelector('.hero-main');
-    if (heroMain) {
-        setTimeout(() => {
-            heroMain.classList.add('typing-effect');
-        }, 500);
-    }
+    // マウス追従エフェクト
+    createMouseFollowEffect();
+    
+    // リップルエフェクト
+    addRippleEffect();
+    
+    // スクロール視差
+    createScrollParallax();
+    
+    // タイピング効果（少し遅らせて実行）
+    setTimeout(() => {
+        enhancedTypingEffect();
+    }, 1000);
     
     // 初期アニメーション
     const heroContent = document.querySelector('.hero-content');
@@ -558,24 +764,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (heroContent) {
         heroContent.style.opacity = '0';
-        heroContent.style.transform = 'translateY(30px)';
-        heroContent.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        heroContent.style.transform = 'translateY(50px)';
+        heroContent.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
         
         setTimeout(() => {
             heroContent.style.opacity = '1';
             heroContent.style.transform = 'translateY(0)';
-        }, 200);
+        }, 300);
     }
     
     if (heroVisual) {
         heroVisual.style.opacity = '0';
-        heroVisual.style.transform = 'translateX(30px)';
-        heroVisual.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        heroVisual.style.transform = 'translateX(50px) scale(0.9)';
+        heroVisual.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
         
         setTimeout(() => {
             heroVisual.style.opacity = '1';
-            heroVisual.style.transform = 'translateX(0)';
-        }, 600);
+            heroVisual.style.transform = 'translateX(0) scale(1)';
+        }, 800);
     }
 });
 
