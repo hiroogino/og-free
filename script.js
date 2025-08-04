@@ -214,6 +214,147 @@ const EMAILJS_CONFIG = {
     publicKey: 'YOUR_PUBLIC_KEY'      // EmailJSで取得したPublic Key
 };
 
+// セキュリティ設定
+const SECURITY_CONFIG = {
+    maxAttempts: 3,           // 最大送信試行回数
+    cooldownTime: 300000,     // クールダウン時間（5分）
+    maxLength: {
+        name: 100,
+        email: 254,           // RFC準拠
+        company: 200,
+        message: 2000
+    }
+};
+
+// セッション管理
+let formAttempts = 0;
+let lastAttemptTime = 0;
+let isInCooldown = false;
+
+// 入力値サニタイズ
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return '';
+    
+    return input
+        .trim()
+        .replace(/[<>\"'&]/g, function(match) {
+            const escape = {
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#x27;',
+                '&': '&amp;'
+            };
+            return escape[match];
+        })
+        .substring(0, 2000); // 最大長制限
+}
+
+// レート制限チェック
+function checkRateLimit() {
+    const now = Date.now();
+    
+    // クールダウン期間チェック
+    if (isInCooldown && (now - lastAttemptTime) < SECURITY_CONFIG.cooldownTime) {
+        const remainingTime = Math.ceil((SECURITY_CONFIG.cooldownTime - (now - lastAttemptTime)) / 1000);
+        throw new Error(`送信制限中です。${remainingTime}秒後に再度お試しください。`);
+    }
+    
+    // クールダウン期間終了
+    if (isInCooldown && (now - lastAttemptTime) >= SECURITY_CONFIG.cooldownTime) {
+        isInCooldown = false;
+        formAttempts = 0;
+    }
+    
+    // 試行回数チェック
+    if (formAttempts >= SECURITY_CONFIG.maxAttempts) {
+        isInCooldown = true;
+        lastAttemptTime = now;
+        throw new Error('送信回数が上限に達しました。5分後に再度お試しください。');
+    }
+    
+    return true;
+}
+
+// 高度な入力検証
+function validateFormData(formData) {
+    const errors = [];
+    
+    // お名前検証
+    const name = formData.get('from_name');
+    if (!name || name.trim().length === 0) {
+        errors.push('お名前は必須です。');
+    } else if (name.length > SECURITY_CONFIG.maxLength.name) {
+        errors.push(`お名前は${SECURITY_CONFIG.maxLength.name}文字以内で入力してください。`);
+    } else if (!/^[ぁ-ゟ一-龯ァ-ヿa-zA-Z\s\-]+$/.test(name)) {
+        errors.push('お名前には日本語、英字、ハイフンのみ使用できます。');
+    }
+    
+    // メールアドレス検証
+    const email = formData.get('from_email');
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!email || !emailRegex.test(email)) {
+        errors.push('正しいメールアドレスを入力してください。');
+    } else if (email.length > SECURITY_CONFIG.maxLength.email) {
+        errors.push('メールアドレスが長すぎます。');
+    }
+    
+    // メッセージ検証
+    const message = formData.get('message');
+    if (!message || message.trim().length === 0) {
+        errors.push('メッセージは必須です。');
+    } else if (message.length > SECURITY_CONFIG.maxLength.message) {
+        errors.push(`メッセージは${SECURITY_CONFIG.maxLength.message}文字以内で入力してください。`);
+    }
+    
+    // 会社名検証（任意項目）
+    const company = formData.get('company');
+    if (company && company.length > SECURITY_CONFIG.maxLength.company) {
+        errors.push(`会社名は${SECURITY_CONFIG.maxLength.company}文字以内で入力してください。`);
+    }
+    
+    // 危険なパターンの検出
+    const dangerousPatterns = [
+        /<script/i,
+        /javascript:/i,
+        /vbscript:/i,
+        /on\w+\s*=/i,
+        /<iframe/i,
+        /<object/i,
+        /<embed/i
+    ];
+    
+    const allInputs = [name, email, message, company].filter(Boolean).join(' ');
+    for (const pattern of dangerousPatterns) {
+        if (pattern.test(allInputs)) {
+            errors.push('不正な文字列が検出されました。');
+            break;
+        }
+    }
+    
+    return errors;
+}
+
+// セキュアなログ関数
+function secureLog(message, data = null) {
+    // 本番環境では無効化
+    if (window.location.hostname === 'hiroogino.github.io') {
+        return;
+    }
+    
+    // 開発環境でのみログ出力（個人情報除外）
+    if (data) {
+        const safeData = { ...data };
+        // 個人情報をマスク
+        if (safeData.from_email) safeData.from_email = safeData.from_email.replace(/(.{2}).*(@.*)/, '$1***$2');
+        if (safeData.from_name) safeData.from_name = safeData.from_name.charAt(0) + '***';
+        if (safeData.message) safeData.message = safeData.message.substring(0, 20) + '...';
+        console.log(message, safeData);
+    } else {
+        console.log(message);
+    }
+}
+
 // フォーム送信処理（EmailJS使用）
 const contactForm = document.querySelector('#contact-form');
 const submitBtn = document.querySelector('#submit-btn');
@@ -223,22 +364,38 @@ if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // ボタンの状態をローディングに変更
-        setButtonLoading(true);
-        showFormStatus('送信中です...', 'loading');
-        
         try {
-            // EmailJSを使用してメール送信
+            // レート制限チェック
+            checkRateLimit();
+            
+            // フォームデータ取得と検証
             const formData = new FormData(this);
+            const validationErrors = validateFormData(formData);
+            
+            if (validationErrors.length > 0) {
+                showFormStatus('❌ ' + validationErrors[0], 'error');
+                return;
+            }
+            
+            // ボタンの状態をローディングに変更
+            setButtonLoading(true);
+            showFormStatus('送信中です...', 'loading');
+            
+            // 試行回数を増加
+            formAttempts++;
+            lastAttemptTime = Date.now();
+            
+            // サニタイズ済みデータ準備
             const templateParams = {
-                from_name: formData.get('from_name'),
-                from_email: formData.get('from_email'),
-                company: formData.get('company') || '未記入',
-                project_type: formData.get('project_type') || '未選択',
-                budget: formData.get('budget') || '未選択',
-                timeline: formData.get('timeline') || '未選択',
-                message: formData.get('message'),
-                to_email: 'hello@example.com' // 受信用メールアドレスに変更
+                from_name: sanitizeInput(formData.get('from_name')),
+                from_email: sanitizeInput(formData.get('from_email')),
+                company: sanitizeInput(formData.get('company')) || '未記入',
+                project_type: sanitizeInput(formData.get('project_type')) || '未選択',
+                budget: sanitizeInput(formData.get('budget')) || '未選択',
+                timeline: sanitizeInput(formData.get('timeline')) || '未選択',
+                message: sanitizeInput(formData.get('message')),
+                timestamp: new Date().toLocaleString('ja-JP'),
+                user_agent: navigator.userAgent.substring(0, 100) // セキュリティ情報
             };
             
             // EmailJS送信（設定が完了している場合）
@@ -250,18 +407,22 @@ if (contactForm) {
                     EMAILJS_CONFIG.publicKey
                 );
                 
+                secureLog('📧 メール送信成功');
                 showFormStatus('✅ お問い合わせありがとうございます！24時間以内にご返信いたします。', 'success');
                 this.reset();
+                formAttempts = 0; // 成功時はリセット
             } else {
                 // 開発/デモ用の疑似送信
                 await simulateEmailSend(templateParams);
+                secureLog('📧 デモ送信完了');
                 showFormStatus('✅ お問い合わせありがとうございます！（デモモード: 実際のメール送信にはEmailJS設定が必要です）', 'success');
                 this.reset();
+                formAttempts = 0; // 成功時はリセット
             }
             
         } catch (error) {
-            console.error('メール送信エラー:', error);
-            showFormStatus('❌ 送信に失敗しました。しばらく経ってから再度お試しください。', 'error');
+            secureLog('❌ メール送信エラー:', { error: error.message });
+            showFormStatus('❌ ' + error.message, 'error');
         } finally {
             setButtonLoading(false);
         }
@@ -299,7 +460,7 @@ function setButtonLoading(isLoading) {
 // 疑似メール送信（デモ用）
 function simulateEmailSend(templateParams) {
     return new Promise((resolve) => {
-        console.log('📧 送信内容（デモ）:', templateParams);
+        secureLog('📧 送信内容（デモ）', templateParams);
         setTimeout(resolve, 2000); // 2秒の疑似処理時間
     });
 }
