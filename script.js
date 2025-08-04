@@ -207,34 +207,179 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// フォーム送信処理
-const contactForm = document.querySelector('.contact-form');
+// EmailJS設定
+const EMAILJS_CONFIG = {
+    serviceID: 'YOUR_SERVICE_ID',     // EmailJSで取得したService ID
+    templateID: 'YOUR_TEMPLATE_ID',   // EmailJSで取得したTemplate ID
+    publicKey: 'YOUR_PUBLIC_KEY'      // EmailJSで取得したPublic Key
+};
+
+// フォーム送信処理（EmailJS使用）
+const contactForm = document.querySelector('#contact-form');
+const submitBtn = document.querySelector('#submit-btn');
+const formStatus = document.querySelector('#form-status');
+
 if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
+    contactForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // フォームデータを取得
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData);
+        // ボタンの状態をローディングに変更
+        setButtonLoading(true);
+        showFormStatus('送信中です...', 'loading');
         
-        // 送信ボタンの状態を変更
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = '送信中...';
-        submitBtn.disabled = true;
-        
-        // 模擬的な送信処理（実際のプロジェクトでは適切なエンドポイントに送信）
-        setTimeout(() => {
-            alert('お問い合わせありがとうございます。24時間以内にご返信いたします。');
-            this.reset();
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-        }, 1000);
+        try {
+            // EmailJSを使用してメール送信
+            const formData = new FormData(this);
+            const templateParams = {
+                from_name: formData.get('from_name'),
+                from_email: formData.get('from_email'),
+                company: formData.get('company') || '未記入',
+                project_type: formData.get('project_type') || '未選択',
+                budget: formData.get('budget') || '未選択',
+                timeline: formData.get('timeline') || '未選択',
+                message: formData.get('message'),
+                to_email: 'hello@example.com' // 受信用メールアドレスに変更
+            };
+            
+            // EmailJS送信（設定が完了している場合）
+            if (EMAILJS_CONFIG.serviceID !== 'YOUR_SERVICE_ID') {
+                await emailjs.send(
+                    EMAILJS_CONFIG.serviceID,
+                    EMAILJS_CONFIG.templateID,
+                    templateParams,
+                    EMAILJS_CONFIG.publicKey
+                );
+                
+                showFormStatus('✅ お問い合わせありがとうございます！24時間以内にご返信いたします。', 'success');
+                this.reset();
+            } else {
+                // 開発/デモ用の疑似送信
+                await simulateEmailSend(templateParams);
+                showFormStatus('✅ お問い合わせありがとうございます！（デモモード: 実際のメール送信にはEmailJS設定が必要です）', 'success');
+                this.reset();
+            }
+            
+        } catch (error) {
+            console.error('メール送信エラー:', error);
+            showFormStatus('❌ 送信に失敗しました。しばらく経ってから再度お試しください。', 'error');
+        } finally {
+            setButtonLoading(false);
+        }
     });
+}
+
+// フォームステータス表示
+function showFormStatus(message, type) {
+    if (!formStatus) return;
+    
+    formStatus.textContent = message;
+    formStatus.className = `form-status show ${type}`;
+    
+    // 成功時は5秒後に自動非表示
+    if (type === 'success') {
+        setTimeout(() => {
+            formStatus.classList.remove('show');
+        }, 5000);
+    }
+}
+
+// ボタンローディング状態
+function setButtonLoading(isLoading) {
+    if (!submitBtn) return;
+    
+    if (isLoading) {
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+    } else {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
+}
+
+// 疑似メール送信（デモ用）
+function simulateEmailSend(templateParams) {
+    return new Promise((resolve) => {
+        console.log('📧 送信内容（デモ）:', templateParams);
+        setTimeout(resolve, 2000); // 2秒の疑似処理時間
+    });
+}
+
+// フォーム入力値のリアルタイム検証
+function setupFormValidation() {
+    const requiredFields = contactForm.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        field.addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validateField(this);
+            }
+        });
+    });
+}
+
+// 個別フィールド検証
+function validateField(field) {
+    const value = field.value.trim();
+    let isValid = true;
+    let errorMessage = '';
+    
+    // 必須チェック
+    if (field.hasAttribute('required') && !value) {
+        isValid = false;
+        errorMessage = '必須項目です';
+    }
+    
+    // メールアドレス形式チェック
+    if (field.type === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            isValid = false;
+            errorMessage = '正しいメールアドレスを入力してください';
+        }
+    }
+    
+    // エラー表示の切り替え
+    field.classList.toggle('error', !isValid);
+    
+    let errorElement = field.parentNode.querySelector('.field-error');
+    if (!isValid && errorMessage) {
+        if (!errorElement) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'field-error';
+            field.parentNode.appendChild(errorElement);
+        }
+        errorElement.textContent = errorMessage;
+    } else if (errorElement) {
+        errorElement.remove();
+    }
+    
+    return isValid;
+}
+
+// EmailJS初期化（設定が完了している場合）
+function initializeEmailJS() {
+    if (typeof emailjs !== 'undefined' && EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY') {
+        emailjs.init(EMAILJS_CONFIG.publicKey);
+        console.log('📧 EmailJS初期化完了');
+    } else {
+        console.log('📧 EmailJS設定待機中（デモモードで動作）');
+    }
 }
 
 // 画面読み込み完了時の初期化
 document.addEventListener('DOMContentLoaded', function() {
+    // EmailJS初期化
+    initializeEmailJS();
+    
+    // フォーム検証設定
+    if (contactForm) {
+        setupFormValidation();
+    }
+    
     // パーティクル効果を追加
     createParticles();
     

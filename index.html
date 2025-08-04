@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- EmailJS CDN -->
+    <script src="https://cdn.emailjs.com/dist/email.min.js" defer></script>
 </head>
 <body>
     <!-- ナビゲーション -->
@@ -332,30 +334,62 @@
                         </div>
                     </div>
                 </div>
-                <form class="contact-form">
+                <form id="contact-form" class="contact-form">
                     <div class="form-group">
-                        <label for="name">お名前</label>
-                        <input type="text" id="name" name="name" required>
+                        <label for="name">お名前 *</label>
+                        <input type="text" id="name" name="from_name" required>
                     </div>
                     <div class="form-group">
-                        <label for="email">メールアドレス</label>
-                        <input type="email" id="email" name="email" required>
+                        <label for="email">メールアドレス *</label>
+                        <input type="email" id="email" name="from_email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="company">会社名・組織名</label>
+                        <input type="text" id="company" name="company">
                     </div>
                     <div class="form-group">
                         <label for="project">プロジェクト種別</label>
-                        <select id="project" name="project">
+                        <select id="project" name="project_type">
                             <option value="">選択してください</option>
                             <option value="direction">Webディレクション</option>
                             <option value="frontend">フロントエンド開発</option>
                             <option value="consulting">コンサルティング</option>
+                            <option value="global">グローバル案件</option>
                             <option value="other">その他</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="message">メッセージ</label>
-                        <textarea id="message" name="message" rows="5" required></textarea>
+                        <label for="budget">予算感</label>
+                        <select id="budget" name="budget">
+                            <option value="">選択してください</option>
+                            <option value="under-50">50万円未満</option>
+                            <option value="50-100">50万円〜100万円</option>
+                            <option value="100-300">100万円〜300万円</option>
+                            <option value="300-500">300万円〜500万円</option>
+                            <option value="over-500">500万円以上</option>
+                            <option value="discuss">要相談</option>
+                        </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">送信する</button>
+                    <div class="form-group">
+                        <label for="timeline">希望納期</label>
+                        <select id="timeline" name="timeline">
+                            <option value="">選択してください</option>
+                            <option value="urgent">1ヶ月以内</option>
+                            <option value="normal">2-3ヶ月</option>
+                            <option value="relaxed">3-6ヶ月</option>
+                            <option value="flexible">6ヶ月以上</option>
+                            <option value="discuss">要相談</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">プロジェクトの詳細・ご質問 *</label>
+                        <textarea id="message" name="message" rows="6" required placeholder="プロジェクトの概要、目的、要望などをご記入ください"></textarea>
+                    </div>
+                    <div class="form-status" id="form-status"></div>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        送信する
+                    </button>
                 </form>
             </div>
         </div>
