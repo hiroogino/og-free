@@ -6,11 +6,13 @@ const navMenu = document.querySelector('.nav-menu');
 // スクロール時のナビゲーション効果
 window.addEventListener('scroll', () => {
     if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-        navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+        navbar.style.background = 'rgba(10, 10, 10, 0.98)';
+        navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.3)';
+        navbar.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
     } else {
-        navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+        navbar.style.background = 'rgba(10, 10, 10, 0.95)';
         navbar.style.boxShadow = 'none';
+        navbar.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
     }
 });
 
@@ -18,6 +20,14 @@ window.addEventListener('scroll', () => {
 hamburger.addEventListener('click', () => {
     hamburger.classList.toggle('active');
     navMenu.classList.toggle('active');
+});
+
+// モバイルメニューのリンククリック時にメニューを閉じる
+navMenu.addEventListener('click', (e) => {
+    if (e.target.tagName === 'A') {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    }
 });
 
 // スムーススクロール
@@ -356,38 +366,7 @@ style.textContent = `
         }
     }
     
-    .hamburger.active span:nth-child(1) {
-        transform: rotate(-45deg) translate(-5px, 6px);
-    }
-    
-    .hamburger.active span:nth-child(2) {
-        opacity: 0;
-    }
-    
-    .hamburger.active span:nth-child(3) {
-        transform: rotate(45deg) translate(-5px, -6px);
-    }
-    
-    .nav-menu.active {
-        display: flex !important;
-        position: fixed;
-        top: 70px;
-        left: 0;
-        width: 100%;
-        background: rgba(10, 10, 10, 0.95);
-        backdrop-filter: blur(10px);
-        flex-direction: column;
-        padding: 2rem;
-        z-index: 999;
-    }
-    
-    .nav-menu.active li {
-        margin: 0.5rem 0;
-    }
-    
-    .nav-menu.active a {
-        color: white;
-    }
+
     
     .typing-effect {
         overflow: hidden;
