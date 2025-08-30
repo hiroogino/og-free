@@ -1,0 +1,19 @@
+@use "../../foundation/mixins" as mix;
+/* scss - Buttons */
+.c-btn { padding: 1rem 2rem; font-size: 1rem; font-weight: 600; border-radius: 3rem; display:inline-flex; align-items:center; gap:.75rem; border: none; cursor: pointer; }
+.c-btn--primary { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); color:#fff; box-shadow: 0 10px 30px rgba(37,99,235,.3); }
+.c-btn--primary { @include mix.lift(-3px); }
+.c-btn--primary:hover { box-shadow: 0 15px 40px rgba(37,99,235,.4); }
+.c-btn--outline { background: rgba(255,255,255,.05); border:2px solid rgba(255,255,255,.2); color:#fff; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.c-btn--outline { @include mix.lift(-3px); }
+.c-btn--outline:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.4); }
+.c-btn--impact { position: relative; overflow: hidden; transition: all .3s ease; }
+.c-btn--impact::before { content:''; position:absolute; inset:0; left:-100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent); transition:left .5s ease; }
+.c-btn--impact:hover::before { left:100%; }
+.c-btn i { transition: transform .3s ease; }
+.c-btn:hover i { transform: translateX(3px); }
+
+/* Loading modifier */
+.c-btn.is-loading { position: relative; color: transparent; }
+.c-btn.is-loading::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:20px; height:20px; border:2px solid #fff; border-top:2px solid transparent; border-radius:50%; animation: c-btn-spin 1s linear infinite; }
+@keyframes c-btn-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }

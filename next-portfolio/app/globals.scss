@@ -1,0 +1,4 @@
+@use "./styles/main" as *;
+
+/* Global base (fonts wired from layout.tsx) */
+body { font-family: var(--font-geist-sans, 'Noto Sans JP', sans-serif); }

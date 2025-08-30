@@ -1,0 +1,6 @@
+/* scss - Project: About section */
+.p-about { background: var(--background-alt); }
+.p-about__content { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; align-items: start; }
+.p-about__highlights { display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:2rem; }
+/* .p-about__stat unused; removed */
+@media (max-width: 1024px) { .p-about__content { grid-template-columns: 1fr; } }

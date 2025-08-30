@@ -1,0 +1,3 @@
+.l-hero { min-height: 100vh; display: flex; align-items: center; }
+.l-hero__container { display: grid; grid-template-columns: 1.5fr 1fr; gap: 3rem; align-items: center; }
+@media (max-width: 1024px) { .l-hero__container { grid-template-columns: 1fr; text-align: center; gap: 3rem; } }

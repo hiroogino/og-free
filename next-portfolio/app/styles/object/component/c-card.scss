@@ -1,0 +1,9 @@
+/* scss - Generic card */
+@use "../../foundation/mixins" as mix;
+.c-card { background: var(--surface); border-radius: 1rem; @include mix.shadow(md); padding: 2rem; }
+.c-card--glass { background: rgba(255,255,255,0.1); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-radius:2rem; box-shadow: 0 25px 50px rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.1); }
+
+/* Stat card */
+.c-card--stat { text-align:center; @include mix.lift(-5px); }
+.c-card--stat .c-card__number { font-size: 2.5rem; font-weight: 700; color: var(--primary-color); }
+.c-card--stat .c-card__label { color: var(--text-secondary); }

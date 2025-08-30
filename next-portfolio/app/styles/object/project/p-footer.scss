@@ -1,0 +1,6 @@
+/* scss */
+.p-footer { background: var(--background-dark); color:#fff; }
+.p-footer__content { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
+.p-footer__links { display:flex; gap:2rem; }
+.p-footer__bottom { border-top:1px solid #334155; padding-top:1rem; text-align:center; color: var(--text-light); }
+@media (max-width: 1024px) { .p-footer__content { flex-direction:column; gap:2rem; } .p-footer__links { flex-wrap:wrap; justify-content:center; } }

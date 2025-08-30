@@ -1,0 +1,10 @@
+/* Layout: header (navbar wrapper) */
+.l-header {
+  position: fixed;
+  inset-block-start: 0;
+  inline-size: 100%;
+  z-index: 1000;
+}
+
+/* Component inside header */
+.l-header .c-navbar { inline-size: 100%; }

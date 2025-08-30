@@ -1,0 +1,17 @@
+@use "../../foundation/mixins" as mix;
+/* scss */
+.p-skills { background: var(--background-alt); }
+.p-skills__content { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:2rem; }
+ // .p-skills__category removed (unused)
+.p-skills__grid { display:grid; grid-template-columns: repeat(2,1fr); gap:1rem; }
+
+/* skill card */
+.p-skills .skill-item {
+  display:flex; flex-direction:column; align-items:center;
+  padding:1rem; border-radius:.5rem; background: var(--background-alt);
+  transition: color .3s ease;
+}
+.p-skills .skill-item { @include mix.lift(-2px); }
+.p-skills .skill-item i { font-size:2rem; margin-bottom:.5rem; color: var(--primary-color); transition: color .3s ease; }
+.p-skills .skill-item:hover { background: var(--primary-color); color: #fff; }
+.p-skills .skill-item:hover i { color:#fff; }

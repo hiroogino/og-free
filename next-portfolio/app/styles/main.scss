@@ -1,0 +1,27 @@
+/* FLOCSS entrypoint (SCSS) */
+@use "./foundation/variables";
+@use "./foundation/mixins";
+@use "./foundation/base";
+
+@use "./layout/l-header";
+@use "./layout/l-hero";
+@use "./layout/l-section";
+
+@use "./object/component/c-button";
+@use "./object/component/c-card";
+@use "./object/component/c-navbar";
+@use "./object/component/c-tag";
+@use "./object/component/c-form";
+@use "./object/component/c-badge";
+
+@use "./object/project/p-hero";
+@use "./object/project/p-about";
+@use "./object/project/p-experience";
+@use "./object/project/p-skills";
+@use "./object/project/p-projects";
+@use "./object/project/p-contact";
+@use "./object/project/p-footer";
+
+@use "./object/utility/u-spacing";
+@use "./object/utility/u-text";
+@use "./object/utility/u-animate";
