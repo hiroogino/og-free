@@ -201,7 +201,7 @@ export default function Home() {
             <ProjectCard
               featured
               imageClass="globastyle"
-              overlay={<><Badge variant="primary">大規模ECサイト</Badge><div style={{marginTop:'.5rem'}}><Badge variant="glass">年商500億円企業</Badge></div></>}
+              overlay={<><Badge variant="primary">大規模ECサイト</Badge><div className="u-spacing--top-sm"><Badge variant="glass">年商500億円企業</Badge></div></>}
               title="GlobaStyle Inc. ECサイト全面リニューアル"
               summary="世界20カ国展開の大手アパレルブランドECサイト。25名の国際チームを統括し、UX改善・多言語化・パフォーマンス向上を実現。"
               stats={[{ value: "25名", label: "チーム規模" }, { value: "8ヶ月", label: "プロジェクト期間" }, { value: "5,000+", label: "商品点数" }]}
@@ -211,7 +211,7 @@ export default function Home() {
             <ProjectCard
               featured
               imageClass="technovision"
-              overlay={<><Badge variant="primary">グローバル企業サイト</Badge><div style={{marginTop:'.5rem'}}><Badge variant="glass">売上1兆円企業</Badge></div></>}
+              overlay={<><Badge variant="primary">グローバル企業サイト</Badge><div className="u-spacing--top-sm"><Badge variant="glass">売上1兆円企業</Badge></div></>}
               title="TechnoVision Corp. 海外サイト立ち上げ"
               summary="大手家電メーカーの海外展開強化プロジェクト。多地域サイト構築から運用センター設立、人材育成まで一貫して統括。"
               stats={[{ value: "15カ国", label: "展開地域" }, { value: "12ヶ月", label: "プロジェクト期間" }, { value: "30名", label: "運用センター体制" }]}

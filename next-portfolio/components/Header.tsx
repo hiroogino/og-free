@@ -31,10 +31,10 @@ export default function Header({ items, brand = "Portfolio", locale = "ja" }: He
             </li>
           ))}
         </ul>
-        <div className="hamburger js-hamburger c-navbar__hamburger" aria-label="Toggle navigation" role="button" tabIndex={0}>
-          <span></span>
-          <span></span>
-          <span></span>
+        <div className="hamburger js-hamburger c-navbar__hamburger" aria-label="メニューを開く" role="button" tabIndex={0}>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
         </div>
       </div>
     </nav>

@@ -12,16 +12,29 @@ const csp = [
 ].join('; ');
 
 const nextConfig: NextConfig = {
+  // ワークスペースのルートディレクトリを明示的に指定
+  turbopack: {
+    root: __dirname,
+  },
+  // パフォーマンス最適化
+  compress: true,
+  // セキュリティヘッダー
   async headers() {
     return [
       {
         source: '/:path*',
         headers: [
           { key: 'Content-Security-Policy', value: csp },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
     ];
   },
+  // 静的最適化
+  trailingSlash: false,
+  reactStrictMode: true,
 };
 
 export default nextConfig;
